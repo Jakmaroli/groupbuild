@@ -1,0 +1,124 @@
+# Groupbuild: friends and agents build a real thing together in chat.
+#
+# Two Claude Code agents share one room with the people in it. The builder
+# builds and commits each version, the critic reviews read-only and replies
+# PASS or FIX, and only a person typing "ship it" ships. Every version,
+# settled conflict and ship is recorded as a room Decision, so the room's
+# Decisions log is the changelog of who asked for what.
+#
+# Format: Switch template language version 1 (docs/TEMPLATES.md in the
+# Switch repo). Shape follows examples/agent-templates/triage-pair.template.yaml.
+# Each agent gets its own working directory under workspaces/ in this repo.
+#
+# Windows note (Switch Console 0.40.1): the template form may offer no
+# provider (sandbox-quantum/switch issue #1511). Workaround: create the two
+# agents with Your Agents -> New agent using the names and instructions
+# below, then create the room by hand. See README.
+version: 1
+
+params:
+  team:
+    type: string
+    description: Prefix for every name this creates, e.g. bday
+    pattern: "[a-z][a-z0-9-]*"
+    default: bday
+  provider:
+    type: provider
+    description: The coding agent that backs both agents. Groupbuild is written for Claude Code.
+    default: [claude, $first]
+    input: advanced
+  location:
+    type: location
+    description: The machine both agents run on.
+    default: local
+    input: advanced
+  builder_directory:
+    type: directory
+    label: Builder directory
+    description: Full path to workspaces/builder in your clone of this repo. Holds its CLAUDE.md and the project/ git repo.
+    input: advanced
+  critic_directory:
+    type: directory
+    label: Critic directory
+    description: Full path to workspaces/critic in your clone of this repo. Holds its CLAUDE.md, which points at the builder's project/.
+    input: advanced
+  bridge:
+    type: bridge
+    description: Where the room is mirrored. Mattermost if set up, else the server's default app.
+    default: [Mattermost, $first]
+
+agents:
+  - name: "{team}-builder"
+    description: Turns the group's requests into a real, working page or mini-app, one versioned change at a time
+    addressing: anyone
+    provider: "{provider}"
+    location: "{location}"
+    directory: "{builder_directory}"
+    instructions: |
+      You are the Planner and Builder in a Groupbuild room. Your full rules are in CLAUDE.md
+      in your working directory. Read it before your first reply.
+      1. DECIDE: when someone starts a plan (an event, a trip, a group project, anything), create
+         a room document "Plan: <name>" with what each person gave and replied/waiting. @mention
+         each person for what's missing in one short message.
+      2. Deadline rule unless someone objects: majority of replies wins, ties go to whoever started
+         the plan, non-repliers go with the group. Turn conflicts into "A: ... / B: ..." votes.
+      3. Group projects: decide the topic first, then the tasks. Fairness rule unless the group
+         agrees otherwise: tasks are split evenly by estimated hours; a member who doesn't reply
+         by the deadline gets the tasks the group assigns them, and the group is told who was
+         assigned what without their input.
+      4. When a person says "deadline's up" or "decide", post the decision, vote counts and who
+         didn't reply. Then BUILD whatever the plan needs as project/index.html. Events/trips:
+         schedule, place, budget split. Group projects: chosen topic, task table (task, owner,
+         hours, deadline, status), milestones before the submission date, and a "Non-responders"
+         section showing which tasks were reassigned and under which rule. Research with
+         WebSearch/WebFetch; list sources and mark unverified numbers "estimate".
+      5. Commit with git -C project, attach index.html, and hand it to @{team}-critic.
+      6. LOCK: only a person saying "lock it" or "ship it" finalises. Post the file + release notes.
+      7. LOG every input, vote, decision, task assignment, version and lock in the room document
+         "Decisions" and as a "DECISION:" line in chat. Keep messages short.
+
+  - name: "{team}-critic"
+    description: Checks every new version before the group sees it as done
+    addressing: owner-agents
+    provider: "{provider}"
+    location: "{location}"
+    directory: "{critic_directory}"
+    instructions: |
+      You are the Critic in a Groupbuild room. Your full rules are in CLAUDE.md in your
+      working directory. Read it before your first reply.
+      1. You only review. Never edit project files or room documents, and never lock.
+      2. When @{team}-builder hands you a version, read the builder's project/index.html and the
+         room documents "Plan: <name>" and "Decisions", then run the checks.
+      3. Event and trip checks: totals and per-person splits add up; nobody's share exceeds the
+         budget they gave; each day is realistic (travel times, opening hours); the plan matches
+         what the group decided and voted; nobody who said they can't come is included.
+      4. Group project checks: every task has exactly one owner; no member has more than ~40% of
+         total hours; every deadline is before the submission date with at least a day of buffer;
+         nothing depends on a task that's due later; the plan matches what was voted.
+      5. Reply in one message: "PASS v<N> — ..." or "FIX v<N>" with at most three concrete issues,
+         @mentioning the builder.
+
+room:
+  name: "{team}-groupbuild"
+  description: Friends ask, the builder builds, the critic checks, a person ships
+  bridge: "{bridge}"
+  agents: ["{team}-builder", "{team}-critic"]
+  users: ["{$creator}"]
+  # If the import rejects this field, delete the instructions block below.
+  instructions: |
+    Talk to the agents with @mentions. Start a plan by saying what it is, for example
+    "@{team}-builder plan a 2-day Gokarna trip". Reply to its questions and vote A or B.
+    A person says "deadline's up" to decide and "lock it" to finalise.
+    Every input, vote, decision, version and lock is logged in the Decisions document.
+
+form:
+  advanced:
+    label: Agents and folders
+    open: false
+
+kickoff: |
+  @{team}-builder and @{team}-critic: this is a Groupbuild room.
+  The people here will describe something they want to make together.
+  Builder builds it, Critic checks it, and nothing ships until a person says "ship it".
+  Builder, start by asking the room what we're making and who it's for.
+  Everyone: talk to the agents with @{team}-builder. Only a person can say "ship it".

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DBMS Mini Project: Library Management System</title>
+<style>
+  :root {
+    --bg: #f7f7f5; --card: #ffffff; --ink: #1d1d1f; --muted: #5f6368;
+    --line: #e3e3df; --accent: #2f6fde; --accent-soft: #e8f0fd;
+    --ok: #1f8a4c; --warn: #b26a00; --warn-soft: #fff4e0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141416; --card: #1d1d20; --ink: #ececec; --muted: #a0a0a6;
+      --line: #2e2e33; --accent: #6ea0ff; --accent-soft: #1e2a40;
+      --ok: #4cc27f; --warn: #f0a640; --warn-soft: #33270f;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
+  header h1 { margin: 0 0 4px; font-size: 1.7rem; }
+  header p { margin: 0; color: var(--muted); }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .chip {
+    font-size: .82rem; padding: 3px 10px; border-radius: 999px;
+    background: var(--accent-soft); color: var(--accent); white-space: nowrap;
+  }
+  .chip.warn { background: var(--warn-soft); color: var(--warn); }
+  nav { margin: 20px 0; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .9rem; }
+  nav a { color: var(--accent); text-decoration: none; }
+  section {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  h2 { margin: 0 0 12px; font-size: 1.2rem; }
+  h3 { margin: 16px 0 6px; font-size: 1rem; }
+  .muted { color: var(--muted); }
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); }
+  .person { border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+  .person h3 { margin: 0 0 2px; }
+  .person .role { color: var(--accent); font-weight: 600; font-size: .92rem; }
+  .hours { font-size: .82rem; color: var(--muted); margin-bottom: 8px; }
+  .accept { font-size: .8rem; margin-bottom: 8px; }
+  .accept.pending { color: var(--warn); }
+  .accept.yes { color: var(--ok); }
+  ul.check { list-style: none; padding: 0; margin: 0; }
+  ul.check li { padding: 3px 0; }
+  ul.check label { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; }
+  ul.check input { margin-top: 5px; }
+  ul.check input:checked + span { color: var(--muted); text-decoration: line-through; }
+  .progress { height: 6px; background: var(--line); border-radius: 3px; margin-top: 10px; overflow: hidden; }
+  .progress > div { height: 100%; width: 0; background: var(--ok); transition: width .2s; }
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  .scroll { overflow-x: auto; }
+  code, .mono { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: .86em; }
+  pre {
+    background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+    padding: 10px 12px; overflow-x: auto; font-size: .84rem; line-height: 1.45;
+  }
+  .tables { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .tbl { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .tbl h4 { margin: 0; padding: 6px 10px; background: var(--accent-soft); color: var(--accent); font-size: .92rem; }
+  .tbl ul { margin: 0; padding: 8px 10px 10px 26px; font-size: .85rem; }
+  .pk { color: var(--ok); font-weight: 600; }
+  .fk { color: var(--warn); font-weight: 600; }
+  .note {
+    background: var(--warn-soft); border-left: 3px solid var(--warn);
+    padding: 8px 12px; border-radius: 6px; font-size: .9rem; margin: 10px 0;
+  }
+  .est { font-size: .75rem; color: var(--warn); border: 1px solid var(--warn); border-radius: 4px; padding: 0 4px; margin-left: 4px; white-space: nowrap; }
+  .new { font-size: .72rem; color: var(--ok); border: 1px solid var(--ok); border-radius: 4px; padding: 0 4px; margin-left: 4px; white-space: nowrap; }
+  ol, ul { padding-left: 22px; }
+  footer { color: var(--muted); font-size: .85rem; margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Library Management System</h1>
+  <p>DBMS mini project plan: topic, fair task split, timeline and starter schema</p>
+  <div class="meta">
+    <span class="chip">Team: priya · sam · kiran</span>
+    <span class="chip warn">Deadline: Mon 9 Nov 2026 (time to confirm)</span>
+    <span class="chip">v2 · draft, not locked</span>
+  </div>
+</header>
+
+<nav>
+  <a href="#changes">What changed</a><a href="#decision">Decision</a><a href="#split">Who does what</a>
+  <a href="#timeline">Timeline</a><a href="#schema">Schema</a><a href="#sql">SQL list</a>
+  <a href="#app">App screens</a><a href="#report">Report</a><a href="#rules">Team rules</a><a href="#sources">Sources</a>
+</nav>
+
+<section id="changes">
+  <h2>What changed in v2</h2>
+  <p class="muted">These fixes come from critic's review of v1.</p>
+  <ul>
+    <li><strong>Schema:</strong> dropped <code>book.available_copies</code>. It was derived data, so a viva examiner could call it redundant, and it could get out of sync. Availability is now calculated from open loans. <code>loan.due_date</code> is now NOT NULL.</li>
+    <li><strong>Return trigger:</strong> it now only writes the fine, and only when a loan goes from open to returned. Editing an already-returned loan no longer tries to add a second fine.</li>
+    <li><strong>Split:</strong> the PPT moved from kiran to priya. kiran's Books/Members screens are now list + search + add only. The app's write code is on the page.</li>
+    <li><strong>Timeline:</strong> Sunday night is now the finish line and Monday morning is only a buffer. The schema freezes at 11 pm tonight. sam's order of work means the procedures are ready by about 1 pm Sunday, before kiran needs them.</li>
+  </ul>
+</section>
+
+<section id="decision">
+  <h2>Decision</h2>
+  <p><strong>Topic: Library Management System.</strong> It is the quickest of the three options to finish in 2 days: clear entities, many good queries, and natural triggers (borrowing rules, late fines).</p>
+  <div class="scroll"><table>
+    <tr><th>Option</th><th>Votes</th></tr>
+    <tr><td>A: Library Management System</td><td>0 (chosen)</td></tr>
+    <tr><td>B: Hospital Appointment System</td><td>0</td></tr>
+    <tr><td>C: College Event Management</td><td>0</td></tr>
+  </table></div>
+  <p class="muted">No votes came in. sam and kiran didn't reply. Under the tie rule the plan starter (priya) decides, and priya asked builder to pick. Anyone can still object before the plan is locked.</p>
+</section>
+
+<section id="split">
+  <h2>Who does what</h2>
+  <p class="muted">These are the default parts, sized to be about equal. Swap if you prefer; if two people want the same part, we vote. <strong>sam and kiran: say a clear yes to your part at tonight's review.</strong> Tick boxes to track progress. Ticks are saved in your own browser only.</p>
+  <div class="grid">
+
+    <div class="person" data-person="priya">
+      <h3>priya</h3>
+      <div class="role">Design + report + PPT</div>
+      <div class="hours">About 8 h <span class="est">estimate</span></div>
+      <div class="accept yes">Accepted (started the plan)</div>
+      <ul class="check">
+        <li><label><input type="checkbox"><span>Refine the 9-table starter schema below (about 1 h). Don't redraw it. Share it before the 11 pm freeze.</span></label></li>
+        <li><label><input type="checkbox"><span>Requirements and scope (half a page)</span></label></li>
+        <li><label><input type="checkbox"><span>ER diagram (draw.io or similar): entities, attributes, cardinalities</span></label></li>
+        <li><label><input type="checkbox"><span>Normalisation 1NF → 3NF with one worked example</span></label></li>
+        <li><label><input type="checkbox"><span>Data dictionary (column, type, constraint, meaning)</span></label></li>
+        <li><label><input type="checkbox"><span>Put the report together, plus abstract, intro and references</span></label></li>
+        <li><label><input type="checkbox"><span>PPT (about 10 slides <span class="est">estimate</span>), reusing the report content <span class="new">v2</span></span></label></li>
+      </ul>
+      <div class="progress"><div></div></div>
+    </div>
+
+    <div class="person" data-person="sam">
+      <h3>sam</h3>
+      <div class="role">SQL: database build</div>
+      <div class="hours">About 8 h <span class="est">estimate</span></div>
+      <div class="accept pending">Waiting for your yes</div>
+      <ul class="check">
+        <li><label><input type="checkbox"><span><code>01_schema.sql</code>: tables, PK/FK, UNIQUE, CHECK, NOT NULL</span></label></li>
+        <li><label><input type="checkbox"><span><code>02_data.sql</code>: sample rows that include some overdue loans, plus fine rows for late returns (the triggers don't exist yet when this loads)</span></label></li>
+        <li><label><input type="checkbox"><span><code>03_objects.sql</code> part 1: 2 triggers + 2 procedures. <strong>Hand them to kiran by about 1 pm Sun.</strong> <span class="new">v2</span></span></label></li>
+        <li><label><input type="checkbox"><span><code>03_objects.sql</code> part 2: 2 views</span></label></li>
+        <li><label><input type="checkbox"><span><code>04_queries.sql</code>: the 12 queries below, with output screenshots</span></label></li>
+        <li><label><input type="checkbox"><span>Report chapters 5-6: implementation + queries with outputs</span></label></li>
+      </ul>
+      <div class="progress"><div></div></div>
+    </div>
+
+    <div class="person" data-person="kiran">
+      <h3>kiran</h3>
+      <div class="role">App + demo</div>
+      <div class="hours">About 8 h <span class="est">estimate</span></div>
+      <div class="accept pending">Waiting for your yes</div>
+      <ul class="check">
+        <li><label><input type="checkbox"><span>Set up the app and connect it to MySQL (Streamlit suggested, unless the teacher requires another stack)</span></label></li>
+        <li><label><input type="checkbox"><span>Build these first: Dashboard, Books and Members (list + search + add) <span class="new">v2</span></span></label></li>
+        <li><label><input type="checkbox"><span>After sam hands over the procedures (about 1 pm Sun): Issue and Return screens</span></label></li>
+        <li><label><input type="checkbox"><span>Reports screen (runs the 12 queries)</span></label></li>
+        <li><label><input type="checkbox"><span>Screenshots for the report, demo script, and run the demo</span></label></li>
+        <li><label><input type="checkbox"><span>Report chapters 7-8: front end + conclusion and future scope</span></label></li>
+      </ul>
+      <div class="progress"><div></div></div>
+    </div>
+
+  </div>
+</section>
+
+<section id="timeline">
+  <h2>Timeline</h2>
+  <p class="muted">All durations and clock times are estimates. <strong>Sunday night is the finish line. Monday morning is only a buffer.</strong> If the deadline turns out to be earlier than Monday, tell the room right away.</p>
+  <div class="scroll"><table>
+    <tr><th>When</th><th>priya</th><th>sam</th><th>kiran</th></tr>
+    <tr><td><strong>Sat, now to 10:30 pm</strong></td><td>Refine the starter schema (about 1 h), start the ER diagram</td><td>Install MySQL, read the schema</td><td>Install Streamlit + the MySQL driver, read the schema</td></tr>
+    <tr><td><strong>Sat 10:30 pm</strong></td><td colspan="3">All three: 30-min schema review. sam and kiran confirm their parts.</td></tr>
+    <tr><td><strong>Sat 11 pm</strong></td><td colspan="3"><strong>Schema frozen.</strong> Changes after this need all three to agree in the room.</td></tr>
+    <tr><td><strong>Sun morning, until 1 pm</strong></td><td>ER diagram final, normalisation, data dictionary</td><td>Tables + sample data, then triggers + procedures (hand over by about 1 pm)</td><td>App setup, Dashboard, Books, Members</td></tr>
+    <tr><td><strong>Sun afternoon, 1-6 pm</strong></td><td>Report chapters 1-4, start the PPT</td><td>Views, then the 12 queries + screenshots</td><td>Issue/Return using sam's procedures, Reports screen</td></tr>
+    <tr><td><strong>Sun evening, 6-10 pm</strong></td><td>Put the report together, finish the PPT</td><td>Chapters 5-6</td><td>Chapters 7-8, screenshots, demo script</td></tr>
+    <tr><td><strong>Sun about 10 pm</strong></td><td colspan="3"><strong>Finish line:</strong> report + PPT done, and one full demo run together</td></tr>
+    <tr><td><strong>Mon morning</strong></td><td colspan="3">Buffer only: fix anything that broke, print, submit before the deadline</td></tr>
+  </table></div>
+</section>
+
+<section id="schema">
+  <h2>Starter schema (3NF)</h2>
+  <p class="muted">This is a starting point for priya to refine, not the final design. <span class="pk">PK</span> = primary key, <span class="fk">FK</span> = foreign key. Use these exact snake_case names so the SQL and the app match. No derived columns are stored: the number of available copies is always calculated from <code>loan</code>.</p>
+  <div class="tables">
+    <div class="tbl"><h4>category</h4><ul>
+      <li><span class="pk">category_id</span> INT</li><li>name VARCHAR UNIQUE NOT NULL</li></ul></div>
+    <div class="tbl"><h4>publisher</h4><ul>
+      <li><span class="pk">publisher_id</span> INT</li><li>name VARCHAR NOT NULL</li><li>city VARCHAR</li></ul></div>
+    <div class="tbl"><h4>author</h4><ul>
+      <li><span class="pk">author_id</span> INT</li><li>name VARCHAR NOT NULL</li></ul></div>
+    <div class="tbl"><h4>book</h4><ul>
+      <li><span class="pk">book_id</span> INT</li><li>isbn VARCHAR UNIQUE</li><li>title VARCHAR NOT NULL</li>
+      <li><span class="fk">category_id</span> → category</li><li><span class="fk">publisher_id</span> → publisher</li>
+      <li>pub_year INT</li><li>total_copies INT CHECK ≥ 0</li>
+      <li class="muted">available_copies removed in v2 (derived data)</li></ul></div>
+    <div class="tbl"><h4>book_author</h4><ul>
+      <li><span class="pk fk">book_id</span> → book</li><li><span class="pk fk">author_id</span> → author</li>
+      <li class="muted">Composite PK; resolves the M:N between book and author</li></ul></div>
+    <div class="tbl"><h4>member</h4><ul>
+      <li><span class="pk">member_id</span> INT</li><li>name VARCHAR NOT NULL</li><li>email VARCHAR UNIQUE</li>
+      <li>phone VARCHAR</li><li>member_type ENUM('student','faculty')</li><li>joined_on DATE</li></ul></div>
+    <div class="tbl"><h4>staff</h4><ul>
+      <li><span class="pk">staff_id</span> INT</li><li>name VARCHAR NOT NULL</li><li>email VARCHAR UNIQUE</li></ul></div>
+    <div class="tbl"><h4>loan</h4><ul>
+      <li><span class="pk">loan_id</span> INT</li><li><span class="fk">book_id</span> → book</li>
+      <li><span class="fk">member_id</span> → member</li><li><span class="fk">staff_id</span> → staff</li>
+      <li>issue_date DATE NOT NULL</li><li>due_date DATE NOT NULL, CHECK ≥ issue_date</li><li>return_date DATE NULL (NULL = still out)</li></ul></div>
+    <div class="tbl"><h4>fine</h4><ul>
+      <li><span class="pk">fine_id</span> INT</li><li><span class="fk">loan_id</span> → loan, UNIQUE</li>
+      <li>amount DECIMAL(8,2)</li><li>paid BOOLEAN DEFAULT FALSE</li><li>paid_on DATE NULL</li></ul></div>
+  </div>
+
+  <h3>Relationships</h3>
+  <ul>
+    <li>category 1 : N book · publisher 1 : N book</li>
+    <li>book M : N author, through <code>book_author</code></li>
+    <li>member 1 : N loan · book 1 : N loan · staff 1 : N loan (loan is the bridge between member and book)</li>
+    <li>loan 1 : 0..1 fine (a fine exists only for a late return)</li>
+  </ul>
+
+  <h3>Available copies (calculated, never stored)</h3>
+<pre>available = book.total_copies
+          - (SELECT COUNT(*) FROM loan l
+             WHERE l.book_id = book.book_id AND l.return_date IS NULL)</pre>
+
+  <h3>Business rules (example values)</h3>
+  <ul>
+    <li>Loan period 14 days <span class="est">estimate</span></li>
+    <li>Max 3 active loans per member <span class="est">estimate</span></li>
+    <li>Late fine ₹5 per day <span class="est">estimate</span>. Use your college library's real rules if you know them.</li>
+  </ul>
+</section>
+
+<section id="sql">
+  <h2>SQL deliverables (sam)</h2>
+  <p class="muted">Order of work: tables + data → triggers + procedures (to kiran by about 1 pm Sun) → views → queries.</p>
+
+  <h3>2 triggers</h3>
+  <ul>
+    <li><code>trg_before_loan_insert</code> (BEFORE INSERT on loan): count the book's open loans. If that count ≥ <code>total_copies</code>, reject with <code>SIGNAL SQLSTATE '45000'</code> "No copies available". Do the same if the member already has 3 open loans: "Borrow limit reached".</li>
+    <li><code>trg_after_loan_return</code> (AFTER UPDATE on loan): writes the fine only. It changes no other table.
+<pre>IF OLD.return_date IS NULL AND NEW.return_date IS NOT NULL
+   AND NEW.return_date &gt; NEW.due_date THEN
+  INSERT INTO fine (loan_id, amount)
+  VALUES (NEW.loan_id, DATEDIFF(NEW.return_date, NEW.due_date) * 5);
+END IF;</pre>
+      <span class="muted">The <code>OLD.return_date IS NULL</code> guard stops a second fine (which would fail on <code>fine.loan_id</code> UNIQUE) when someone edits a loan that's already returned.</span></li>
+  </ul>
+
+  <h3>2 procedures</h3>
+  <ul>
+    <li><code>sp_issue_book(member_id, book_id, staff_id)</code>: insert the loan with <code>issue_date = CURDATE()</code> and <code>due_date = CURDATE() + INTERVAL 14 DAY</code>. The trigger does the checks.</li>
+    <li><code>sp_return_book(loan_id)</code>: <code>UPDATE loan SET return_date = CURDATE() WHERE loan_id = … AND return_date IS NULL</code>, then return the fine (if any)</li>
+  </ul>
+
+  <h3>2 views</h3>
+  <ul>
+    <li><code>v_book_catalog</code>: book + authors (GROUP_CONCAT) + category + publisher + <strong>available copies (calculated as above)</strong></li>
+    <li><code>v_active_loans</code>: open loans with member, book, due date and days overdue</li>
+  </ul>
+
+  <h3>12 queries (each shows a different concept, which helps in the viva)</h3>
+  <div class="scroll"><table>
+    <tr><th>#</th><th>Query</th><th>Concept</th></tr>
+    <tr><td>1</td><td>Available books in a given category</td><td>JOIN + calculated availability</td></tr>
+    <tr><td>2</td><td>Search books by title keyword or author name</td><td>LIKE + M:N JOIN</td></tr>
+    <tr><td>3</td><td>Members with overdue books and days overdue</td><td>Date functions</td></tr>
+    <tr><td>4</td><td>Top 5 most borrowed books</td><td>GROUP BY + ORDER BY + LIMIT</td></tr>
+    <tr><td>5</td><td>Members with unpaid fines and total owed</td><td>SUM + GROUP BY</td></tr>
+    <tr><td>6</td><td>Books never borrowed</td><td>LEFT JOIN / NOT EXISTS</td></tr>
+    <tr><td>7</td><td>Loans per month</td><td>DATE_FORMAT + GROUP BY</td></tr>
+    <tr><td>8</td><td>Books and copies per category</td><td>COUNT + SUM</td></tr>
+    <tr><td>9</td><td>Members who borrowed more than the average</td><td>Subquery</td></tr>
+    <tr><td>10</td><td>Authors with more than one book</td><td>HAVING</td></tr>
+    <tr><td>11</td><td>Staff member who issued the most loans</td><td>Aggregate + subquery</td></tr>
+    <tr><td>12</td><td>Full loan history of one member</td><td>4-table JOIN</td></tr>
+  </table></div>
+  <div class="note">Trigger bodies with several statements need <code>BEGIN … END</code>. Each trigger name must be unique in the schema (MySQL 8.4 manual).</div>
+</section>
+
+<section id="app">
+  <h2>App screens (kiran)</h2>
+  <ol>
+    <li><strong>Dashboard</strong>: counts of books, members, active loans and overdue loans. Build first.</li>
+    <li><strong>Books</strong>: list + search from <code>v_book_catalog</code>, plus add. Build first.</li>
+    <li><strong>Members</strong>: list + search, plus add. Build first.</li>
+    <li><strong>Issue book</strong>: pick a member and a book, call <code>sp_issue_book</code>, and show the trigger's message if it's rejected. Build after about 1 pm Sun.</li>
+    <li><strong>Return book</strong>: pick an open loan, call <code>sp_return_book</code>, show the fine. Build after about 1 pm Sun.</li>
+    <li><strong>Reports</strong>: a dropdown that runs the 12 queries and shows each result as a table</li>
+  </ol>
+
+  <h3>Reading and writing with Streamlit</h3>
+<pre>import streamlit as st
+from sqlalchemy import text
+
+conn = st.connection("mysql", type="sql")   # settings in .streamlit/secrets.toml
+
+# read (ttl=0 so lists refresh right after a write)
+books = conn.query("SELECT * FROM v_book_catalog", ttl=0)
+
+# write: call a procedure, show the trigger's SIGNAL message on failure
+try:
+    with conn.session as s:
+        s.execute(text("CALL sp_issue_book(:m, :b, :st)"),
+                  {"m": member_id, "b": book_id, "st": staff_id})
+        s.commit()
+    st.success("Book issued")
+except Exception as e:
+    st.error(f"Could not issue: {getattr(e, 'orig', e)}")</pre>
+  <p class="muted"><code>st.connection</code> needs Streamlit 1.28+. Don't commit <code>secrets.toml</code>.</p>
+</section>
+
+<section id="report">
+  <h2>Report outline</h2>
+  <div class="scroll"><table>
+    <tr><th>Chapter</th><th>Owner</th></tr>
+    <tr><td>1. Abstract + Introduction</td><td>priya</td></tr>
+    <tr><td>2. Requirements + scope</td><td>priya</td></tr>
+    <tr><td>3. ER diagram + relational schema</td><td>priya</td></tr>
+    <tr><td>4. Normalisation (1NF → 3NF)</td><td>priya</td></tr>
+    <tr><td>5. Implementation: tables, constraints, triggers, procedures, views</td><td>sam</td></tr>
+    <tr><td>6. Queries with outputs</td><td>sam</td></tr>
+    <tr><td>7. Front end + screenshots</td><td>kiran</td></tr>
+    <tr><td>8. Conclusion + future scope</td><td>kiran</td></tr>
+    <tr><td>References, final assembly + PPT</td><td>priya</td></tr>
+  </table></div>
+</section>
+
+<section id="rules">
+  <h2>Team rules</h2>
+  <ul>
+    <li>One shared folder: <code>design/</code>, <code>sql/</code> (01-04 files), <code>app/</code>, <code>report/</code></li>
+    <li>The schema freezes at 11 pm Sat. After that, any change needs all three to agree in the room.</li>
+    <li>Post in the room when you finish something another person depends on, above all sam's procedures handover to kiran.</li>
+    <li>Decisions: the majority of replies wins, ties go to priya, and anyone who doesn't reply goes with the group.</li>
+  </ul>
+</section>
+
+<section id="sources">
+  <h2>Sources</h2>
+  <ul>
+    <li><a href="https://dev.mysql.com/doc/refman/8.4/en/create-trigger.html">MySQL 8.4 Reference Manual: CREATE TRIGGER</a> (BEFORE/AFTER timing, INSERT/UPDATE/DELETE events, BEGIN…END, unique names)</li>
+    <li><a href="https://docs.streamlit.io/develop/tutorials/databases/mysql">Streamlit docs: Connect Streamlit to MySQL</a> (st.connection, secrets.toml, 1.28+, query caching/ttl)</li>
+    <li><a href="https://learn.microsoft.com/en-us/training/modules/explore-performance-based-design/2-describe-normalization">Microsoft Learn: Describe normalization</a> (1NF/2NF/3NF)</li>
+    <li><a href="https://en.wikiversity.org/wiki/Database_Fundamentals/Normalization">Wikiversity: Database Fundamentals / Normalization</a></li>
+    <li><a href="https://creately.com/guides/er-diagram-for-library-management-systems/">Creately: ER diagram for library management systems</a> (typical entities; loan as the bridge entity)</li>
+    <li>critic's review of v1 (schema, split and timeline fixes)</li>
+  </ul>
+  <p class="muted">Everything marked <span class="est">estimate</span> is an unverified example value or time guess. The <code>conn.session</code> write snippet follows critic's review and Streamlit's SQL connection pattern; run it once early on Sunday to confirm it works with your installed versions. The schema and split were not checked against your teacher's rubric: if there is one, it overrides this page.</p>
+</section>
+
+<footer>v2 · built by builder for priya, sam and kiran · 7 Nov 2026 · draft until someone says "lock it"</footer>
+</div>
+
+<script>
+  // Persist checkbox ticks per person in this browser and show progress.
+  document.querySelectorAll('.person').forEach(function (card) {
+    var who = card.dataset.person;
+    var boxes = card.querySelectorAll('input[type=checkbox]');
+    var bar = card.querySelector('.progress > div');
+    function update() {
+      var done = 0;
+      boxes.forEach(function (b) { if (b.checked) done++; });
+      bar.style.width = (boxes.length ? (100 * done / boxes.length) : 0) + '%';
+    }
+    boxes.forEach(function (b, i) {
+      var key = 'dbms-plan-v2:' + who + ':' + i;
+      try { b.checked = localStorage.getItem(key) === '1'; } catch (e) {}
+      b.addEventListener('change', function () {
+        try { localStorage.setItem(key, b.checked ? '1' : '0'); } catch (e) {}
+        update();
+      });
+    });
+    update();
+  });
+</script>
+</body>
+</html>

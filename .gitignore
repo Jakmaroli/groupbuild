@@ -1,0 +1,18 @@
+# Each agent's working directory is a local copy made from agents/ by the
+# "Configure paths" step in README.md. It holds absolute paths for your machine
+# and the builder's project/ git repo, so none of it is committed.
+workspaces/
+
+# Ship output
+dist/
+
+# OS and editor noise
+Thumbs.db
+.DS_Store
+node_modules/
+
+# Secrets: never commit local env or key files
+.env
+.env.*
+*.pem
+*.key

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Happy Birthday Arjun!</title>
+  <style>
+    :root {
+      --blue-900: #0b2a5b;
+      --blue-700: #1554b3;
+      --blue-500: #2f80ed;
+      --blue-200: #bcd8ff;
+      --white: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: var(--white);
+      background: linear-gradient(160deg, var(--blue-900) 0%, var(--blue-700) 55%, var(--blue-500) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px 16px;
+      overflow-x: hidden;
+    }
+    main { width: 100%; max-width: 720px; }
+    .surprise {
+      display: inline-block;
+      margin: 0 0 12px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--blue-200);
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(2.6rem, 12vw, 5.5rem);
+      line-height: 1.05;
+      font-weight: 800;
+      text-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    }
+    h1 .name { display: block; color: var(--blue-200); }
+    .cake { font-size: clamp(3rem, 14vw, 5rem); margin: 20px 0 8px; }
+    p.message { font-size: 1.15rem; line-height: 1.5; margin: 8px auto 0; max-width: 32ch; }
+    .balloons { position: fixed; inset: 0; pointer-events: none; z-index: -1; }
+    .balloon {
+      position: absolute;
+      bottom: -80px;
+      width: 44px;
+      height: 56px;
+      border-radius: 50% 50% 48% 48%;
+      background: var(--blue-200);
+      opacity: 0.55;
+      animation: rise 12s linear infinite;
+    }
+    .balloon:nth-child(1) { left: 8%;  animation-delay: 0s; }
+    .balloon:nth-child(2) { left: 30%; animation-delay: 3s;  background: var(--white); }
+    .balloon:nth-child(3) { left: 55%; animation-delay: 6s; }
+    .balloon:nth-child(4) { left: 78%; animation-delay: 9s;  background: var(--white); }
+    @keyframes rise {
+      from { transform: translateY(0); }
+      to   { transform: translateY(-120vh); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .balloon { animation: none; display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="balloons" aria-hidden="true">
+    <span class="balloon"></span><span class="balloon"></span>
+    <span class="balloon"></span><span class="balloon"></span>
+  </div>
+  <main>
+    <p class="surprise">Surprise!</p>
+    <h1>Happy Birthday <span class="name">Arjun</span></h1>
+    <div class="cake" aria-hidden="true">🎂</div>
+    <p class="message">From all your friends. Hope this year is your best one yet.</p>
+  </main>
+</body>
+</html>

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "attribution": {
+    "commit": "",
+    "sessionUrl": false
+  },
+  "permissions": {
+    "defaultMode": "dontAsk",
+    "allow": [
+      "WebSearch",
+      "WebFetch",
+      "Read(<GROUPBUILD_DIR_RULE>/workspaces/builder/**)",
+      "Edit(<GROUPBUILD_DIR_RULE>/workspaces/builder/**)",
+      "Bash(git *)",
+      "Bash(mkdir -p dist)",
+      "PowerShell(git *)",
+      "PowerShell(New-Item -ItemType Directory -Force dist)"
+    ],
+    "ask": [
+      "Bash(git push *)",
+      "Bash(git -C * push *)",
+      "PowerShell(git push *)",
+      "PowerShell(git -C * push *)"
+    ],
+    "deny": [
+      "Edit(<GROUPBUILD_DIR_RULE>/workspaces/builder/.claude/**)",
+      "Edit(<GROUPBUILD_DIR_RULE>/workspaces/builder/CLAUDE.md)",
+      "Bash(git config *)",
+      "Bash(git -C * config *)",
+      "Bash(git remote *)",
+      "Bash(git -C * remote *)",
+      "PowerShell(git config *)",
+      "PowerShell(git -C * config *)",
+      "PowerShell(git remote *)",
+      "PowerShell(git -C * remote *)"
+    ]
+  }
+}
