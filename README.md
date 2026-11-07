@@ -74,7 +74,7 @@ agent. With those installed, setup takes about 5 minutes.
    server with Mattermost.
 2. **Clone and configure paths.**
    ```
-   git clone <repo-url> groupbuild
+   git clone https://github.com/Jakmaroli/groupbuild.git
    cd groupbuild
    ```
    Then run the script in [Configure paths](#configure-paths) for your OS. It creates each
