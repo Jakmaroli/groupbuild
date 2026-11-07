@@ -48,6 +48,17 @@ puts the agreeing and the building in the group chat itself.
 3. **Lock.** Only a person saying `lock it` (or `ship it`) finalises. The Builder posts the final
    page with release notes: what was decided, who contributed what, who didn't reply, and what
    the Critic caught.
+   
+```mermaid
+flowchart LR
+  P[Friends in the group chat] -->|requests, votes, deadline's up| PL[Planner agent]
+  PL -->|asks, A/B votes, decides by group rule| P
+  PL -->|plan v1, v2...| CR[Critic agent - read-only]
+  CR -->|PASS / FIX| PL
+  PL -->|plan file| P
+  P -->|lock it - humans only| L[Locked plan]
+  PL -.->|every decision| D[(Decisions room doc)]
+```
 
 Every input, vote, decision, task assignment, version and the lock goes into a `Decisions` room
 document, one line each with who, and is posted in chat as a `DECISION:` line.
